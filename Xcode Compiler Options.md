@@ -7,7 +7,7 @@ Special meanings:
 ## Address Sanitizer
 ### Enable C++ Container Overflow Checks - `CLANG_ADDRESS_SANITIZER_CONTAINER_OVERFLOW` (Boolean)
 Check for C++ container overflow when Address Sanitizer is enabled. This check requires the entire application to be built with Address Sanitizer. If not, it may report false positives.
-Condition: `$(CLANG_ADDRESS_SANITIZER) == YES`
+Condition: `$(CLANG_ADDRESS_SANITIZER)`
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
@@ -125,7 +125,7 @@ Unrolls loops. Unrolling makes the code larger, but may make it faster by reduci
 
 ### Relax IEEE Compliance - `GCC_FAST_MATH` (Boolean)
 Enables some floating point optimizations that are not IEEE754-compliant, but which usually work. Programs that require strict IEEE compliance may not work with this option.
-Condition: `$(LLVM_IMPLICIT_AGGRESSIVE_OPTIMIZATIONS) == NO`
+Condition: `!$(LLVM_IMPLICIT_AGGRESSIVE_OPTIMIZATIONS)`
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
@@ -488,36 +488,16 @@ File types: C++, Objective-C++
 | Enumeration value | Command Line Argument |
 | ----- | -------- |
 | `c++0x` | `-std=c++11` |
-| `c++17` | `-std=c++1z` |
 | **`compiler-default`** |  |
 | `gnu++0x` | `-std=gnu++11` |
-| `gnu++17` | `-std=gnu++1z` |
 | `c++98` | ``-std=c++98`` |
 | `gnu++98` | ``-std=gnu++98`` |
 | `c++14` | ``-std=c++14`` |
 | `gnu++14` | ``-std=gnu++14`` |
-
-
-
-### C++ Standard Library - `CLANG_CXX_LIBRARY` (Enumeration)
-Choose a version of the C++ standard library to use.
-
-* *libstdc++:* A traditional C++ standard library that works with GCC and Clang (default).
-* *libc++:* A highly optimized C++ standard library that works only with Clang, and is designed to support new C++11 features.
-File types: C++, Objective-C++
-
-| Enumeration value | Command Line Argument |
-| ----- | -------- |
-| **`compiler-default`** |  |
-| `libstdc++` | ``-stdlib=libstdc++`` |
-| `libc++` | ``-stdlib=libc++`` |
-
-
-| Enumeration value | Linker Argument |
-| ----- | -------- |
-| **`compiler-default`** |  |
-| `libstdc++` | ``-stdlib=libstdc++`` |
-| `libc++` | ``-stdlib=libc++`` |
+| `c++17` | ``-std=c++17`` |
+| `gnu++17` | ``-std=gnu++17`` |
+| `c++20` | ``-std=c++20`` |
+| `gnu++20` | ``-std=gnu++20`` |
 
 
 
@@ -577,7 +557,7 @@ The option only sets an internal value, which is used by other options as a cond
 
 ### Link Frameworks Automatically - `CLANG_MODULES_AUTOLINK` (Boolean)
 Automatically link SDK frameworks that are referenced using `#import` or `#include`. This feature requires also enabling support for modules. This build setting only applies to C-family languages.
-Condition: `$(CLANG_ENABLE_MODULES) == YES`
+Condition: `$(CLANG_ENABLE_MODULES)`
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
@@ -588,7 +568,7 @@ Condition: `$(CLANG_ENABLE_MODULES) == YES`
 
 ### Disable Private Modules Warnings - `CLANG_MODULES_DISABLE_PRIVATE_WARNING` (Boolean)
 Disable warnings related to the recommended use of private module naming. This only makes sense when support for modules is enabled.
-Condition: `$(CLANG_ENABLE_MODULES) == YES`
+Condition: `$(CLANG_ENABLE_MODULES)`
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
@@ -600,7 +580,7 @@ Condition: `$(CLANG_ENABLE_MODULES) == YES`
 ### Allow Non-modular Includes In Framework Modules - `CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES` (Boolean)
 Enabling this setting allows non-modular includes to be used from within framework modules. This is inherently unsafe, as such headers might cause duplicate definitions when used by any client that imports both the framework and the non-modular includes.
 
-Condition: `$(CLANG_ENABLE_MODULES) == YES`
+Condition: `$(CLANG_ENABLE_MODULES)`
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
@@ -642,18 +622,19 @@ File types: Objective-C, Objective-C++
 
 ### Implicitly Link Objective-C Runtime Support - `CLANG_LINK_OBJC_RUNTIME` (Boolean)
 When linking a target using Objective-C code, implicitly link in Foundation (and if deploying back to an older OS) a backwards compatibility library to allow newer language features to run on an OS where the runtime support is not natively available. Most targets that use Objective-C should use this, although there are rare cases where a target should opt out of this behavior.
+Default value: **`$(LINK_OBJC_RUNTIME)`**
 File types: Objective-C, Objective-C++
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
 | `NO` |  |
-| **`YES`** |  |
+| `YES` |  |
 
 
 | Boolean value | Linker Argument |
 | ----- | -------- |
 | `NO` |  |
-| **`YES`** | `-fobjc-link-runtime` |
+| `YES` | `-fobjc-link-runtime` |
 
 
 
@@ -673,7 +654,6 @@ File types: Objective-C, Objective-C++
 ## None
 ### `CLANG_TARGET_TRIPLE_ARCHS` (StringList)
 Default value: **`$(CURRENT_ARCH)`**
-Condition: `$(USE_LLVM_TARGET_TRIPLES_FOR_CLANG) == YES`
 
 | Command Line Argument |
 | -------- |
@@ -681,20 +661,11 @@ Condition: `$(USE_LLVM_TARGET_TRIPLES_FOR_CLANG) == YES`
 
 
 ### `CLANG_TARGET_TRIPLE_VARIANTS` (StringList)
-Condition: `$(USE_LLVM_TARGET_TRIPLES_FOR_CLANG) == YES`
 Condition Flavors: `arch`
 
 | Command Line Argument |
 | -------- |
 | `-target-variant $(stringlist)` |
-
-
-### `arch` (String)
-Condition: `$(USE_LLVM_TARGET_TRIPLES_FOR_CLANG) != YES`
-
-| Command Line Argument |
-| -------- |
-| `-arch $(string)` |
 
 
 ### `CLANG_TOOLCHAIN_FLAGS` (StringList)
@@ -761,9 +732,27 @@ Default value: **`$(COLOR_DIAGNOSTICS)`**
 The option only sets an internal value, which is used by other options as a condition or as an internal parameter.
 
 
+### `CLANG_CXX_LIBRARY` (Enumeration)
+File types: C++, Objective-C++
+
+| Enumeration value | Command Line Argument |
+| ----- | -------- |
+| **`compiler-default`** |  |
+| `libstdc++` |  |
+| `libc++` | ``-stdlib=libc++`` |
+
+
+| Enumeration value | Linker Argument |
+| ----- | -------- |
+| **`compiler-default`** |  |
+| `libstdc++` |  |
+| `libc++` | ``-stdlib=libc++`` |
+
+
+
 ### `CLANG_DEBUG_MODULES` (Boolean)
 Default value: **`$(CLANG_ENABLE_MODULE_DEBUGGING)`**
-Condition: `$(GCC_GENERATE_DEBUGGING_SYMBOLS) == YES  &&  ! $(INDEX_ENABLE_BUILD_ARENA)  &&  ( $(CLANG_ENABLE_MODULES) == YES  ||  ( $(GCC_PREFIX_HEADER) != ''  &&  $(GCC_PRECOMPILE_PREFIX_HEADER) == YES ) )`
+Condition: `$(GCC_GENERATE_DEBUGGING_SYMBOLS)  &&  ! $(INDEX_ENABLE_BUILD_ARENA)  &&  ( $(CLANG_ENABLE_MODULES)  ||  ( $(GCC_PREFIX_HEADER) != ''  &&  $(GCC_PRECOMPILE_PREFIX_HEADER) ) )`
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
@@ -774,7 +763,7 @@ Condition: `$(GCC_GENERATE_DEBUGGING_SYMBOLS) == YES  &&  ! $(INDEX_ENABLE_BUILD
 
 ### `CLANG_MODULE_CACHE_PATH` (String)
 Default value: **`$(MODULE_CACHE_DIR)`**
-Condition: `$(CLANG_ENABLE_MODULES) == YES`
+Condition: `$(CLANG_ENABLE_MODULES)`
 
 | String value | Command Line Argument |
 | ----- | -------- |
@@ -784,7 +773,7 @@ Condition: `$(CLANG_ENABLE_MODULES) == YES`
 
 
 ### `CLANG_MODULE_LSV` (Boolean)
-Condition: `$(CLANG_ENABLE_MODULES) == YES`
+Condition: `$(CLANG_ENABLE_MODULES)`
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
@@ -795,7 +784,7 @@ Condition: `$(CLANG_ENABLE_MODULES) == YES`
 
 ### `CLANG_MODULES_PRUNE_INTERVAL` (String)
 Default value: **`86400`**
-Condition: `$(CLANG_ENABLE_MODULES) == YES`
+Condition: `$(CLANG_ENABLE_MODULES)`
 
 | String value | Command Line Argument |
 | ----- | -------- |
@@ -806,7 +795,7 @@ Condition: `$(CLANG_ENABLE_MODULES) == YES`
 
 ### `CLANG_MODULES_PRUNE_AFTER` (String)
 Default value: **`345600`**
-Condition: `$(CLANG_ENABLE_MODULES) == YES`
+Condition: `$(CLANG_ENABLE_MODULES)`
 
 | String value | Command Line Argument |
 | ----- | -------- |
@@ -817,7 +806,7 @@ Condition: `$(CLANG_ENABLE_MODULES) == YES`
 
 ### `CLANG_MODULES_IGNORE_MACROS` (StringList)
 Default value: **`$(GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS)`**
-Condition: `$(CLANG_ENABLE_MODULES) == YES`
+Condition: `$(CLANG_ENABLE_MODULES)`
 
 | Command Line Argument |
 | -------- |
@@ -825,7 +814,7 @@ Condition: `$(CLANG_ENABLE_MODULES) == YES`
 
 
 ### `CLANG_MODULES_VALIDATE_SYSTEM_HEADERS` (Boolean)
-Condition: `$(CLANG_ENABLE_MODULES) == YES`
+Condition: `$(CLANG_ENABLE_MODULES)`
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
@@ -835,7 +824,7 @@ Condition: `$(CLANG_ENABLE_MODULES) == YES`
 
 
 ### `CLANG_MODULES_BUILD_SESSION_FILE` (String)
-Condition: `$(CLANG_ENABLE_MODULES) == YES`
+Condition: `$(CLANG_ENABLE_MODULES)`
 
 | String value | Command Line Argument |
 | ----- | -------- |
@@ -845,12 +834,32 @@ Condition: `$(CLANG_ENABLE_MODULES) == YES`
 
 
 ### `CLANG_ENABLE_MODULE_IMPLEMENTATION_OF` (Boolean)
-Condition: `$(CLANG_ENABLE_MODULES) == YES && $(DEFINES_MODULE) == YES`
+Condition: `$(CLANG_ENABLE_MODULES) && $(DEFINES_MODULE)`
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
 | `NO` |  |
 | **`YES`** | `-fmodule-name=$(PRODUCT_MODULE_NAME)` |
+
+
+
+### `CLANG_ENABLE_BOUNDS_ATTRIBUTES` (Boolean)
+File types: C
+
+| Boolean value | Command Line Argument |
+| ----- | -------- |
+| **`NO`** |  |
+| `YES` | `-fbounds-attributes` |
+
+
+
+### `CLANG_ENABLE_BOUNDS_SAFETY` (Boolean)
+File types: C
+
+| Boolean value | Command Line Argument |
+| ----- | -------- |
+| **`NO`** |  |
+| `YES` | `-fbounds-safety` |
 
 
 
@@ -944,8 +953,10 @@ File types: C, Objective-C, C++, Objective-C++
 
 | Enumeration value | Command Line Argument |
 | ----- | -------- |
+| **`default`** |  |
 | `pattern` | `-ftrivial-auto-var-init=pattern` |
-| **`uninitialized`** |  |
+| `uninitialized` | `-ftrivial-auto-var-init=uninitialized` |
+| `zero` | `-ftrivial-auto-var-init=zero -enable-trivial-auto-var-init-zero-knowing-it-will-be-removed-from-clang` |
 
 
 
@@ -1055,6 +1066,17 @@ File types: C++, Objective-C++
 
 
 
+### `CLANG_WARN_XNU_TYPED_ALLOCATORS` (Enumeration)
+
+| Enumeration value | Command Line Argument |
+| ----- | -------- |
+| **`DEFAULT`** |  |
+| `NO` | `-Wno-xnu-typed-allocators` |
+| `YES` | `-Wxnu-typed-allocators` |
+| `YES_ERROR` | `-Werror=xnu-typed-allocators` |
+
+
+
 ### Enable Exceptions - `GCC_ENABLE_EXCEPTIONS` (Boolean)
 Enable exception handling. Generates extra code needed to propagate exceptions. For some targets, this implies GCC will generate frame unwind information for all functions, which can produce significant data size overhead, although it does not affect execution. If you do not specify this option, GCC will enable it by default for languages like C++ and Objective-C that normally require exception handling, and disable it for languages like C that do not normally require it. However, you may need to enable this option when compiling C code that needs to interoperate properly with exception handlers written in other languages. You may also wish to disable this option if you are compiling older programs that don't use exception handling.
 Default value: **`NO`**
@@ -1062,17 +1084,6 @@ Default value: **`NO`**
 | Command Line Argument |
 | -------- |
 | `-fexceptions` |
-
-
-### `GCC_MACOSX_VERSION_MIN` (String)
-Default value: **`$($(DEPLOYMENT_TARGET_SETTING_NAME))`**
-Condition: `$(USE_LLVM_TARGET_TRIPLES_FOR_CLANG) != YES`
-
-| String value | Command Line Argument |
-| ----- | -------- |
-| `<<empty>>` |  |
-| `<<otherwise>>` | `-$(DEPLOYMENT_TARGET_CLANG_FLAG_NAME)=$(value)` |
-
 
 
 ### `GCC_DEBUG_INFORMATION_FORMAT` (Enumeration)
@@ -1239,8 +1250,8 @@ Default value: **`$(CLANG_COVERAGE_MAPPING)`**
 
 ### `CLANG_BITCODE_GENERATION_MODE` (Enumeration)
 Default value: **`$(BITCODE_GENERATION_MODE)`**
-Condition: `$(ENABLE_BITCODE) == YES`
-Architectures: `arm64, arm64e, armv7, armv7s, armv7k`
+Condition: `$(ENABLE_BITCODE)`
+Architectures: `arm64, arm64e, armv7, armv7s, armv7k, arm64_32`
 
 | Enumeration value | Command Line Argument |
 | ----- | -------- |
@@ -1267,7 +1278,7 @@ Default value: **`$(ENABLE_ADDRESS_SANITIZER)`**
 
 
 ### `CLANG_ADDRESS_SANITIZER_USE_AFTER_SCOPE` (Boolean)
-Condition: `$(CLANG_ADDRESS_SANITIZER) == YES`
+Condition: `$(CLANG_ADDRESS_SANITIZER)`
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
@@ -1278,12 +1289,45 @@ Condition: `$(CLANG_ADDRESS_SANITIZER) == YES`
 
 ### `CLANG_ADDRESS_SANITIZER_ALLOW_ERROR_RECOVERY` (Boolean)
 Default value: **`$(ENABLE_ADDRESS_SANITIZER_ALLOW_ERROR_RECOVERY)`**
-Condition: `$(CLANG_ADDRESS_SANITIZER) == YES`
+Condition: `$(CLANG_ADDRESS_SANITIZER)`
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
 | `NO` |  |
 | `YES` | `-fsanitize-recover=address` |
+
+
+
+### `CLANG_LIBFUZZER` (Boolean)
+Default value: **`$(ENABLE_LIBFUZZER)`**
+
+| Boolean value | Command Line Argument |
+| ----- | -------- |
+| `NO` |  |
+| `YES` | `-fsanitize=fuzzer -fno-sanitize-coverage=pc-table` |
+
+
+| Boolean value | Linker Argument |
+| ----- | -------- |
+| `NO` |  |
+| `YES` | `-fsanitize=fuzzer,-fno-sanitize-coverage=pc-table` |
+
+
+
+### `CLANG_SANITIZER_COVERAGE` (Boolean)
+Default value: **`$(ENABLE_SANITIZER_COVERAGE)`**
+Condition: `!$(CLANG_LIBFUZZER)`
+
+| Boolean value | Command Line Argument |
+| ----- | -------- |
+| `NO` |  |
+| `YES` | `-fsanitize=fuzzer-no-link -fno-sanitize-coverage=pc-table` |
+
+
+| Boolean value | Linker Argument |
+| ----- | -------- |
+| `NO` |  |
+| `YES` | `-fsanitize=fuzzer-no-link,-fno-sanitize-coverage=pc-table` |
 
 
 
@@ -1311,7 +1355,7 @@ The option only sets an internal value, which is used by other options as a cond
 
 ### `CLANG_INDEX_STORE_ENABLE` (Boolean)
 Default value: **`$(INDEX_ENABLE_DATA_STORE)`**
-Condition: `$(COMPILER_INDEX_STORE_ENABLE) == YES  ||  ( $(COMPILER_INDEX_STORE_ENABLE) == Default  &&  $(GCC_OPTIMIZATION_LEVEL) == 0 )`
+Condition: `$(COMPILER_INDEX_STORE_ENABLE)  ||  ( $(COMPILER_INDEX_STORE_ENABLE) == Default  &&  $(GCC_OPTIMIZATION_LEVEL) == 0 )`
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
@@ -1322,7 +1366,7 @@ Condition: `$(COMPILER_INDEX_STORE_ENABLE) == YES  ||  ( $(COMPILER_INDEX_STORE_
 
 ### `CLANG_THREAD_SANITIZER` (Boolean)
 Default value: **`$(ENABLE_THREAD_SANITIZER)`**
-Architectures: `x86_64, arm64, arm64e`
+Architectures: `x86_64, x86_64h, arm64, arm64e`
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
@@ -1416,7 +1460,7 @@ File types: Objective-C, Objective-C++
 ## Undefined Behavior Sanitizer
 ### Enable Extra Integer Checks - `CLANG_UNDEFINED_BEHAVIOR_SANITIZER_INTEGER` (Boolean)
 Check for unsigned integer overflow, in addition to checks for signed integer overflow.
-Condition: `$(CLANG_UNDEFINED_BEHAVIOR_SANITIZER) == YES`
+Condition: `$(CLANG_UNDEFINED_BEHAVIOR_SANITIZER)`
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
@@ -1427,7 +1471,7 @@ Condition: `$(CLANG_UNDEFINED_BEHAVIOR_SANITIZER) == YES`
 
 ### Enable Nullability Annotation Checks - `CLANG_UNDEFINED_BEHAVIOR_SANITIZER_NULLABILITY` (Boolean)
 Check for violations of nullability annotations in function calls, return statements, and assignments.
-Condition: `$(CLANG_UNDEFINED_BEHAVIOR_SANITIZER) == YES`
+Condition: `$(CLANG_UNDEFINED_BEHAVIOR_SANITIZER)`
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
@@ -1603,6 +1647,16 @@ Warn whenever a switch statement has an index of enumeral type and lacks a case 
 | ----- | -------- |
 | `NO` | `-Wno-switch` |
 | **`YES`** | `-Wswitch` |
+
+
+
+### Completion Handler Misuse - `CLANG_WARN_COMPLETION_HANDLER_MISUSE` (Boolean)
+Warn when a function-like parameter annotated as a completion handler is called more than once or not called at all on an execution path.
+
+| Boolean value | Command Line Argument |
+| ----- | -------- |
+| **`NO`** |  |
+| `YES` | `-Wcompletion-handler` |
 
 
 
@@ -1800,6 +1854,17 @@ Warn when a comparison between signed and unsigned values could produce an incor
 | ----- | -------- |
 | **`NO`** |  |
 | `YES` | `-Wsign-compare` |
+
+
+
+### Implicit Fallthrough in Switch Statement - `CLANG_WARN_IMPLICIT_FALLTHROUGH` (Enumeration)
+Warn about implicit fallthrough in switch statement. Use `__attribute__((fallthrough))` (C/ObjC) or `[[fallthrough]]` (C++) to mark intentional fallthrough.
+
+| Enumeration value | Command Line Argument |
+| ----- | -------- |
+| **`NO`** | `-Wno-implicit-fallthrough` |
+| `YES` | `-Wimplicit-fallthrough` |
+| `YES_ERROR` | `-Werror=implicit-fallthrough` |
 
 
 
@@ -2302,7 +2367,7 @@ Issue all the warnings demanded by strict ISO C and ISO C++; reject all programs
 
 
 
-# Static Analyzer
+# Static Analysis
 Apple Clang Static Analyzer
 Source File Option: `--analyze`
 
@@ -2343,15 +2408,6 @@ The option only sets an internal value, which is used by other options as a cond
 | ----- | -------- |
 | `default` |  |
 | **`plist-multi-file`** | ``-Xclang -analyzer-output=plist-multi-file`` |
-
-
-
-### `CLANG_ANALYZER_ALTERNATE_EDGES` (Boolean)
-
-| Boolean value | Command Line Argument |
-| ----- | -------- |
-| `NO` | `-Xclang -analyzer-config -Xclang path-diagnostics-alternate=false` |
-| **`YES`** | `-Xclang -analyzer-config -Xclang path-diagnostics-alternate=true` |
 
 
 
@@ -2413,7 +2469,7 @@ The option only sets an internal value, which is used by other options as a cond
 
 
 ### `__CLANG_ANALYZER_SILENCE_CHECKERS` (Boolean)
-Condition: `$(CLANG_ANALYZER_NULL_DEREFERENCE) == NO || $(CLANG_ANALYZER_DIVIDE_BY_ZERO) == NO`
+Condition: `!$(CLANG_ANALYZER_NULL_DEREFERENCE) || !$(CLANG_ANALYZER_DIVIDE_BY_ZERO)`
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
@@ -2486,6 +2542,16 @@ Warn if functions accepting `CFErrorRef` or `NSError` cannot indicate that an er
 
 
 
+### C-style Downcasts of IOKit Objects - `CLANG_ANALYZER_OSOBJECT_C_STYLE_CAST` (Boolean)
+Warn when a C-style cast is used for downcasting a pointer to an OSObject. RTTI-aware casts (OSRequiredCast, OSDynamicCast) are more secure and should be used instead of C-style casts in order to avoid potential type confusion attacks.
+
+| Boolean value | Command Line Argument |
+| ----- | -------- |
+| **`NO`** |  |
+| `YES` | `-Xclang -analyzer-checker -Xclang optin.osx.OSObjectCStyleCast` |
+
+
+
 ### Misuse of Grand Central Dispatch - `CLANG_ANALYZER_GCD` (Boolean)
 Check for misuses of the Grand Central Dispatch API.
 
@@ -2548,7 +2614,7 @@ Check for Grand Central Dispatch idioms that may lead to poor performance.
 
 
 ### Violation of IOKit and libkern Reference Counting Rules - `CLANG_ANALYZER_LIBKERN_RETAIN_COUNT` (Boolean)
-Finds leaks and overreleases associated with objects inheriting from OSObject
+Finds leaks and overreleases associated with objects inheriting from OSObject.
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
@@ -2559,13 +2625,47 @@ Finds leaks and overreleases associated with objects inheriting from OSObject
 
 
 
-## Generic Issues
-### Dead Stores - `CLANG_ANALYZER_DEADCODE_DEADSTORES` (Boolean)
-Check for values stored to variables and never read again.
+## Issues - C++
+### Use-After-Move Errors in C++ - `CLANG_ANALYZER_USE_AFTER_MOVE` (Enumeration)
+Warn when a C++ object is used after it has been moved from.
+
+| Enumeration value | Command Line Argument |
+| ----- | -------- |
+| `NO` | `-Xclang -analyzer-disable-checker -Xclang cplusplus.Move` |
+| `YES` | `-Xclang -analyzer-config -Xclang cplusplus.Move:WarnOn=KnownsOnly` |
+| **`YES_AGGRESSIVE`** |  |
+
+
+
+### Moves of Universal References - `CLANG_TIDY_BUGPRONE_MOVE_FORWARDING_REFERENCE` (Boolean)
+Warn when use of std::move on a universal reference would cause non-expiring lvalue arguments to be moved unexpectedly.
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
-| `NO` | `-Xclang -analyzer-disable-checker -Xclang deadcode.DeadStores` |
+| `NO` | `-Xclang -analyzer-tidy-checker=-bugprone-move-forwarding-reference` |
+| **`YES`** |  |
+
+
+
+
+
+## Generic Issues
+### Side Effects in Assert Conditions - `CLANG_TIDY_BUGPRONE_ASSERT_SIDE_EFFECT` (Boolean)
+Warn when condition of assert or NSAssert has a side effect. Assert conditions are not evaluated during release builds.
+
+| Boolean value | Command Line Argument |
+| ----- | -------- |
+| `NO` | `-Xclang -analyzer-tidy-checker=-bugprone-assert-side-effect` |
+| **`YES`** |  |
+
+
+
+### Infinite Loops - `CLANG_TIDY_BUGPRONE_INFINITE_LOOP` (Boolean)
+Warn when a loop is discovered to have no termination condition.
+
+| Boolean value | Command Line Argument |
+| ----- | -------- |
+| `NO` | `-Xclang -analyzer-tidy-checker=-bugprone-infinite-loop` |
 | **`YES`** |  |
 
 
@@ -2603,17 +2703,6 @@ Check for misuses of `nonnull` parameter and return types.
 | `NO` | `-Xclang -analyzer-disable-checker -Xclang nullability` |
 | `YES` |  |
 | **`YES_NONAGGRESSIVE`** | `-Xclang -analyzer-config -Xclang nullability:NoDiagnoseCallsToSystemHeaders=true` |
-
-
-
-### Use-After-Move Errors in C++ - `CLANG_ANALYZER_USE_AFTER_MOVE` (Enumeration)
-Warn when a C++ object is used after it has been moved from.
-
-| Enumeration value | Command Line Argument |
-| ----- | -------- |
-| `NO` | `-Xclang -analyzer-disable-checker -Xclang cplusplus.Move` |
-| `YES` | `-Xclang -analyzer-config -Xclang cplusplus.Move:WarnOn=KnownsOnly` |
-| **`YES_AGGRESSIVE`** |  |
 
 
 
@@ -2803,6 +2892,39 @@ Warn on uses of the `vfork` function, which is inherently insecure. Use the safe
 | ----- | -------- |
 | `NO` | `-Xclang -analyzer-disable-checker -Xclang security.insecureAPI.vfork` |
 | **`YES`** | `-Xclang -analyzer-checker -Xclang security.insecureAPI.vfork` |
+
+
+
+
+
+## Issues - Unused Code
+### Dead Stores - `CLANG_ANALYZER_DEADCODE_DEADSTORES` (Boolean)
+Check for values stored to variables and never read again.
+
+| Boolean value | Command Line Argument |
+| ----- | -------- |
+| `NO` | `-Xclang -analyzer-disable-checker -Xclang deadcode.DeadStores` |
+| **`YES`** |  |
+
+
+
+### Redundant Nested 'if' Conditions - `CLANG_TIDY_BUGPRONE_REDUNDANT_BRANCH_CONDITION` (Boolean)
+Warn when an if-statement is redundant because its condition is equivalent to the condition of a larger if-statement it is nested into.
+
+| Boolean value | Command Line Argument |
+| ----- | -------- |
+| **`NO`** |  |
+| `YES` | `-Xclang -analyzer-tidy-checker=bugprone-redundant-branch-condition` |
+
+
+
+### Redundant Expressions - `CLANG_TIDY_MISC_REDUNDANT_EXPRESSION` (Boolean)
+Warn when a sub-expression of an arithmetic or logic expression can be omitted because it has no effect on the result.
+
+| Boolean value | Command Line Argument |
+| ----- | -------- |
+| **`NO`** |  |
+| `YES` | `-Xclang -analyzer-tidy-checker=misc-redundant-expression` |
 
 
 

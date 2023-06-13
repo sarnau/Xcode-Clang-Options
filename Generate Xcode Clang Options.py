@@ -12,10 +12,10 @@ import os
 # All clang warnings are documented at https://clang.llvm.org/docs/DiagnosticsReference.html
 
 appPath = '/Applications/Xcode.app'
-xcodePluginsResourcesPath = appPath + "/Contents/PlugIns/Xcode3Core.ideplugin/Contents/SharedSupport/Developer/Library/Xcode/Plug-ins/Clang LLVM 1.0.xcplugin/Contents/Resources/"
+xcodePluginsResourcesPath = appPath + "/Contents/Developer/Library/Xcode/Plug-ins/XCBSpecifications.ideplugin/Contents/Resources/"
 
 # This file contains the user readable name and descriptions of the visible options
-Apple_Clang_strings = plistlib.load(open(xcodePluginsResourcesPath + "en.lproj/Apple Clang.strings","rb"), fmt=plistlib.FMT_BINARY)
+Apple_Clang_strings = plistlib.load(open(xcodePluginsResourcesPath + "Apple Clang.strings","rb"), fmt=plistlib.FMT_BINARY)
 
 # load the xcspec file (after converting it from the ASCII plist format to XML) and generate categories, just like Xcode
 tempSpecFile = tempfile.gettempdir() + "/Clang_LLVM_xcspec.xml"
