@@ -257,14 +257,6 @@ Condition: `! $(CLANG_INSTRUMENT_FOR_OPTIMIZATION_PROFILING) && ! $(CLANG_COVERA
 
 
 
-### Enable Code Coverage Support - `CLANG_ENABLE_CODE_COVERAGE` (Boolean)
-Enables building with code coverage instrumentation. This is only used when the build has code coverage enabled, which is typically done via the Xcode scheme settings.
-
-Default value: **`YES`**
-
-The option only sets an internal value, which is used by other options as a condition or as an internal parameter.
-
-
 
 
 ## Custom Compiler Flags
@@ -328,6 +320,8 @@ Choose a standard or non-standard C language dialect.
 * *GNU99:* Accept ISO C99 and GNU extensions. [-std=gnu99]
 * *C11:* Accept ISO C11 (2011), but not GNU extensions. [-std=c11]
 * *GNU11:* Accept ISO C11 and GNU extensions. [-std=gnu11]
+* *C17:* Accept ISO C17 (2018), but not GNU extensions. [-std=c17]
+* *GNU17:* Accept ISO C17 and GNU extensions. [-std=gnu11]
 * *Compiler Default:* Tells the compiler to use its default C language dialect. This is normally the best choice unless you have specific needs. (Currently equivalent to GNU99.)
 File types: C, Objective-C
 
@@ -341,6 +335,8 @@ File types: C, Objective-C
 | `gnu99` | ``-std=gnu99`` |
 | `c11` | ``-std=c11`` |
 | `gnu11` | ``-std=gnu11`` |
+| `c17` | ``-std=c17`` |
+| `gnu17` | ``-std=gnu17`` |
 
 
 
@@ -488,8 +484,10 @@ File types: C++, Objective-C++
 | Enumeration value | Command Line Argument |
 | ----- | -------- |
 | `c++0x` | `-std=c++11` |
+| `c++23` | `-std=c++2b` |
 | **`compiler-default`** |  |
 | `gnu++0x` | `-std=gnu++11` |
+| `gnu++23` | `-std=gnu++2b` |
 | `c++98` | ``-std=c++98`` |
 | `gnu++98` | ``-std=gnu++98`` |
 | `c++14` | ``-std=c++14`` |
@@ -593,7 +591,7 @@ Condition: `$(CLANG_ENABLE_MODULES)`
 
 ## Language - Objective-C
 ### Objective-C Automatic Reference Counting - `CLANG_ENABLE_OBJC_ARC` (Boolean)
-Compiles reference-counted Objective-C code (when garbage collection is not enabled) to use Automatic Reference Counting. Code compiled using automated reference counting is compatible with other code (such as frameworks) compiled using either manual reference counting (for example, traditional `retain` and `release` messages) or automated reference counting. Using this mode is currently incompatible with compiling code to use Objective-C Garbage Collection.
+Compiles reference-counted Objective-C code to use Automatic Reference Counting. Code compiled using automated reference counting is compatible with other code (such as frameworks) compiled using either manual reference counting (for example, traditional `retain` and `release` messages) or automated reference counting. [-fobjc-arc]
 File types: Objective-C, Objective-C++
 
 | Boolean value | Command Line Argument |
@@ -639,13 +637,24 @@ File types: Objective-C, Objective-C++
 
 
 ### Enable Objective-C Exceptions - `GCC_ENABLE_OBJC_EXCEPTIONS` (Boolean)
-This setting enables `@try`/`@catch`/`@throw` syntax for handling exceptions in Objective-C code. Only applies to Objective-C.
+This setting enables `@try`/`@catch`/`@throw` syntax for handling exceptions in Objective-C code. Only applies to Objective-C. [-fobjc-exceptions]
 File types: Objective-C, Objective-C++
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
 | `NO` | `-fno-objc-exceptions` |
 | **`YES`** |  |
+
+
+
+### Enable Objective-C ARC Exceptions - `CLANG_ENABLE_OBJC_ARC_EXCEPTIONS` (Boolean)
+This setting causes clang to use exception-handler-safe code when synthesizing retains and releases when using ARC. Without this, ARC is not exception-safe. Only applies to Objective-C. [-fobjc-arc-exceptions]
+File types: Objective-C, Objective-C++
+
+| Boolean value | Command Line Argument |
+| ----- | -------- |
+| **`NO`** |  |
+| `YES` | `-fobjc-arc-exceptions` |
 
 
 
@@ -714,7 +723,7 @@ Default value: **`$(COLOR_DIAGNOSTICS)`**
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
-| `NO` |  |
+| `NO` | `-fno-color-diagnostics` |
 | `YES` | `-fcolor-diagnostics` |
 
 
@@ -956,7 +965,7 @@ File types: C, Objective-C, C++, Objective-C++
 | **`default`** |  |
 | `pattern` | `-ftrivial-auto-var-init=pattern` |
 | `uninitialized` | `-ftrivial-auto-var-init=uninitialized` |
-| `zero` | `-ftrivial-auto-var-init=zero -enable-trivial-auto-var-init-zero-knowing-it-will-be-removed-from-clang` |
+| `zero` | `-ftrivial-auto-var-init=zero` |
 
 
 
@@ -1228,6 +1237,12 @@ File types: Objective-C, Objective-C++
 
 
 
+### `CLANG_ENABLE_CODE_COVERAGE` (Boolean)
+Default value: **`$(ENABLE_CODE_COVERAGE)`**
+
+The option only sets an internal value, which is used by other options as a condition or as an internal parameter.
+
+
 ### `CLANG_COVERAGE_MAPPING` (Boolean)
 Condition: `$(CLANG_ENABLE_CODE_COVERAGE)`
 
@@ -1347,6 +1362,25 @@ Default value: **`$(ENABLE_UNDEFINED_BEHAVIOR_SANITIZER)`**
 
 
 
+### `CLANG_UNDEFINED_BEHAVIOR_SANITIZER_TRAP_ON_SECURITY_ISSUES` (Boolean)
+
+| Boolean value | Command Line Argument |
+| ----- | -------- |
+| **`NO`** |  |
+| `YES` | `-fsanitize=signed-integer-overflow,unsigned-integer-overflow,implicit-conversion,bounds,pointer-overflow -fsanitize-trap=signed-integer-overflow,unsigned-integer-overflow,implicit-conversion,bounds,pointer-overflow` |
+
+
+
+### `CLANG_UNDEFINED_BEHAVIOR_SANITIZER_TRAP_ON_SECURITY_ISSUES_OPT` (Boolean)
+Condition: `$(CLANG_UNDEFINED_BEHAVIOR_SANITIZER_TRAP_ON_SECURITY_ISSUES) && $(GCC_OPTIMIZATION_LEVEL) != 0`
+
+| Boolean value | Command Line Argument |
+| ----- | -------- |
+| `NO` |  |
+| **`YES`** | `-fsanitize=object-size -fsanitize-trap=object-size` |
+
+
+
 ### `CLANG_INDEX_STORE_PATH` (Path)
 Default value: **`$(INDEX_DATA_STORE_DIR)`**
 
@@ -1412,6 +1446,25 @@ Architectures: `x86_64, x86_64h, arm64, arm64e`
 | Command Line Argument |
 | -------- |
 | `-arcmt-migrate-report-output $(path)` |
+
+
+### `CLANG_ENABLE_PREFIX_MAPPING` (Boolean)
+Condition: `$(CLANG_ENABLE_COMPILE_CACHE)`
+
+| Boolean value | Command Line Argument |
+| ----- | -------- |
+| `NO` |  |
+| `YES` | `-fdepscan-prefix-map-sdk=/^sdk -fdepscan-prefix-map-toolchain=/^toolchain -fdepscan-prefix-map=$(DEVELOPER_DIR)=/^xcode` |
+
+
+
+### `CLANG_OTHER_PREFIX_MAPPINGS` (StringList)
+Default value: **""**
+Condition: `$(CLANG_ENABLE_COMPILE_CACHE) && $(CLANG_ENABLE_PREFIX_MAPPING)`
+
+| Command Line Argument |
+| -------- |
+| `-fdepscan-prefix-map=$(value)` |
 
 
 
@@ -2347,12 +2400,11 @@ Enabling this option causes all warnings to be treated as errors.
 
 ### Inhibit All Warnings - `GCC_WARN_INHIBIT_ALL_WARNINGS` (Boolean)
 Inhibit all warning messages.
+Default value: **`$(SUPPRESS_WARNINGS)`**
 
-| Boolean value | Command Line Argument |
-| ----- | -------- |
-| **`NO`** |  |
-| `YES` | `-w` |
-
+| Command Line Argument |
+| -------- |
+| `-w` |
 
 
 ### Pedantic Warnings - `GCC_WARN_PEDANTIC` (Boolean)
