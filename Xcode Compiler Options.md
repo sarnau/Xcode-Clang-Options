@@ -340,6 +340,14 @@ File types: C, Objective-C
 
 
 
+### Use Response Files - `CLANG_USE_RESPONSE_FILE` (Boolean)
+When this setting is enabled, the build system will use response files to share common arguments between similar invocations of `clang`, eliminating redundant information in build logs.
+
+Default value: **`YES`**
+
+The option only sets an internal value, which is used by other options as a condition or as an internal parameter.
+
+
 ### 'char' Type Is Unsigned - `GCC_CHAR_IS_UNSIGNED_CHAR` (Boolean)
 Enabling this setting causes `char` to be unsigned by default, disabling it causes `char` to be signed by default.
 
@@ -1310,6 +1318,22 @@ Condition: `$(CLANG_ADDRESS_SANITIZER)`
 | ----- | -------- |
 | `NO` |  |
 | `YES` | `-fsanitize-recover=address` |
+
+
+
+### `ENABLE_SYSTEM_SANITIZERS` (Boolean)
+Condition: `$(CLANG_ADDRESS_SANITIZER)`
+
+| Boolean value | Command Line Argument |
+| ----- | -------- |
+| `NO` |  |
+| `YES` | `-fsanitize-stable-abi` |
+
+
+| Boolean value | Linker Argument |
+| ----- | -------- |
+| `NO` |  |
+| `YES` | `-fsanitize-stable-abi` |
 
 
 

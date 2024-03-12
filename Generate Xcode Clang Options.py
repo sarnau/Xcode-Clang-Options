@@ -12,7 +12,7 @@ import os
 # All clang warnings are documented at https://clang.llvm.org/docs/DiagnosticsReference.html
 
 appPath = '/Applications/Xcode.app'
-xcodePluginsResourcesPath = appPath + "/Contents/Developer/Library/Xcode/Plug-ins/XCBSpecifications.ideplugin/Contents/Resources/"
+xcodePluginsResourcesPath = appPath + "/Contents/SharedFrameworks/XCBuild.framework/Versions/A/PlugIns/XCBBuildService.bundle/Contents/PlugIns/XCBSpecifications.ideplugin/Contents/Resources/"
 
 # This file contains the user readable name and descriptions of the visible options
 Apple_Clang_strings = plistlib.load(open(xcodePluginsResourcesPath + "Apple Clang.strings","rb"), fmt=plistlib.FMT_BINARY)
