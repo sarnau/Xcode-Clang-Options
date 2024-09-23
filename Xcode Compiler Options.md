@@ -207,7 +207,7 @@ Architectures: `i386, x86_64`
 
 
 ### Symbols Hidden by Default - `GCC_SYMBOLS_PRIVATE_EXTERN` (Boolean)
-When enabled, all symbols are declared `private extern` unless explicitly marked to be exported using `\_\_attribute\_\_((visibility("default")))` in code. If not enabled, all symbols are exported unless explicitly marked as `private extern`. See [Controlling Symbol Visibility](https://developer.apple.com/library/content/documentation/DeveloperTools/Conceptual/CppRuntimeEnv/Articles/SymbolVisibility.html#//apple_ref/doc/uid/TP40001670-CJBGBHEJ) in [C++ Runtime Environment Programming Guide](https://developer.apple.com/library/content/documentation/DeveloperTools/Conceptual/CppRuntimeEnv/CPPRuntimeEnv.html).
+When enabled, all symbols are declared `private extern` unless explicitly marked to be exported using `__attribute__((visibility("default")))` in code. If not enabled, all symbols are exported unless explicitly marked as `private extern`. See [Controlling Symbol Visibility](https://developer.apple.com/library/content/documentation/DeveloperTools/Conceptual/CppRuntimeEnv/Articles/SymbolVisibility.html#//apple_ref/doc/uid/TP40001670-CJBGBHEJ) in [C++ Runtime Environment Programming Guide](https://developer.apple.com/library/content/documentation/DeveloperTools/Conceptual/CppRuntimeEnv/CPPRuntimeEnv.html).
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
@@ -312,7 +312,7 @@ Controls whether the standard system directories are searched for header files. 
 Choose a standard or non-standard C language dialect.
 
 * *ANSI C:* Accept ISO C90 and ISO C++, turning off GNU extensions that are incompatible. [-ansi]
-  Incompatible GNU extensions include the `asm`, `inline`, and `typeof` keywords (but not the equivalent `\_\_asm\_\_`, `\_\_inline\_\_`, and `\_\_typeof\_\_` forms), and the `//` syntax for comments.
+  Incompatible GNU extensions include the `asm`, `inline`, and `typeof` keywords (but not the equivalent `__asm__`, `__inline__`, and `__typeof__` forms), and the `//` syntax for comments.
   This setting also enables trigraphs.
 * *C89:* Accept ISO C90 (1990), but not GNU extensions. [-std=c89]
 * *GNU89:* Accept ISO C90 and GNU extensions. [-std=gnu89]
@@ -369,7 +369,7 @@ Controls whether `asm`, `inline`, and `typeof` are treated as keywords or whethe
 
 
 ### Recognize Builtin Functions - `GCC_ENABLE_BUILTIN_FUNCTIONS` (Boolean)
-Controls whether builtin functions that do not begin with `\_\_builtin\_` as prefix are recognized.
+Controls whether builtin functions that do not begin with `__builtin_` as prefix are recognized.
 
 GCC normally generates special code to handle certain builtin functions more efficiently; for instance, calls to `alloca` may become single instructions that adjust the stack directly, and calls to `memcpy` may become inline copy loops. The resulting code is often both smaller and faster, but since the function calls no longer appear as such, you cannot set a breakpoint on those calls, nor can you change the behavior of the functions by linking with a different library. In addition, when a function is recognized as a builtin function, GCC may use information about that function to warn about problems with calls to that function, or to generate more efficient code, even if the resulting code still contains calls to that function. For example, warnings are given with `-Wformat` for bad calls to `printf`, when `printf` is built in, and `strlen` is known not to modify global memory.
 
@@ -492,10 +492,8 @@ File types: C++, Objective-C++
 | Enumeration value | Command Line Argument |
 | ----- | -------- |
 | `c++0x` | `-std=c++11` |
-| `c++23` | `-std=c++2b` |
 | **`compiler-default`** |  |
 | `gnu++0x` | `-std=gnu++11` |
-| `gnu++23` | `-std=gnu++2b` |
 | `c++98` | ``-std=c++98`` |
 | `gnu++98` | ``-std=gnu++98`` |
 | `c++14` | ``-std=c++14`` |
@@ -504,6 +502,8 @@ File types: C++, Objective-C++
 | `gnu++17` | ``-std=gnu++17`` |
 | `c++20` | ``-std=c++20`` |
 | `gnu++20` | ``-std=gnu++20`` |
+| `c++23` | ``-std=c++23`` |
+| `gnu++23` | ``-std=gnu++23`` |
 
 
 
@@ -529,6 +529,30 @@ File types: C++, Objective-C++
 
 
 
+### Enable C++ Standard Library Hardening - `CLANG_CXX_STANDARD_LIBRARY_HARDENING` (Enumeration)
+Enable hardening in the C++ standard library.
+
+Available values:
+
+* *No:* No runtime hardening checks.
+* *Yes (fast):* Enable low-overhead security-critical checks at runtime.
+* *Yes (extensive):* Enable low-overhead checks at runtime to find security issues as well as general logic errors.
+* *Yes (debug):* Enable all available checks in the library, including high-overhead heuristic checks and internal assertions. This mode should **not** be used in production.
+
+This setting defines the value of the `_LIBCPP_HARDENING_MODE` preprocessor macro.
+Default value: **`$(__LIBRARY_HARDENING_DEFAULT_VALUE)`**
+File types: C++, Objective-C++
+
+| Enumeration value | Command Line Argument |
+| ----- | -------- |
+| `<<empty>>` |  |
+| `debug` | `-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG` |
+| `extensive` | `-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_EXTENSIVE` |
+| `fast` | `-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_FAST` |
+| `none` | `-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_NONE` |
+
+
+
 ### Destroy Static Objects - `CLANG_ENABLE_CPP_STATIC_DESTRUCTORS` (Boolean)
 Controls whether variables with static or thread storage duration should have their exit-time destructors run.
 File types: C++, Objective-C++
@@ -545,6 +569,7 @@ File types: C++, Objective-C++
 ## Language - Modules
 ### Enable Modules (C and Objective-C) - `CLANG_ENABLE_MODULES` (Boolean)
 Enables the use of modules for system APIs. System headers are imported as semantic modules instead of raw headers. This can result in faster builds and project indexing.
+File types: C, Objective-C, C++, Objective-C++
 
 | Boolean value | Command Line Argument |
 | ----- | -------- |
@@ -896,6 +921,28 @@ Default value: **`$(APPLICATION_EXTENSION_API_ONLY)`**
 
 
 
+### `__LIBRARY_HARDENING_DEFAULT_VALUE_0` (String)
+Default value: **`debug`**
+
+The option only sets an internal value, which is used by other options as a condition or as an internal parameter.
+
+
+### `__LIBRARY_HARDENING_DEFAULT_VALUE` (String)
+Default value: **`$(__LIBRARY_HARDENING_DEFAULT_VALUE_$(GCC_OPTIMIZATION_LEVEL))`**
+
+The option only sets an internal value, which is used by other options as a condition or as an internal parameter.
+
+
+### `CLANG_WARN_UNSAFE_BUFFER_USAGE` (Boolean)
+File types: C++, Objective-C++
+
+| Boolean value | Command Line Argument |
+| ----- | -------- |
+| **`NO`** |  |
+| `YES` | `-Wunsafe-buffer-usage` |
+
+
+
 ### `LLVM_OPTIMIZATION_LEVEL_VAL_0` (Boolean)
 Default value: **`NO`**
 
@@ -1037,7 +1084,7 @@ The option only sets an internal value, which is used by other options as a cond
 
 
 ### `CPP_HEADERMAP_PRODUCT_HEADERS_VFS_FILE` (Path)
-Default value: **`$(PROJECT_TEMP_DIR)/all-product-headers.yaml`**
+Default value: **`$(CONFIGURATION_TEMP_DIR)/$(PROJECT_NAME)-$(PROJECT_GUID)-VFS$(EFFECTIVE_PLATFORM_NAME)/all-product-headers.yaml`**
 
 The option only sets an internal value, which is used by other options as a condition or as an internal parameter.
 
@@ -1111,6 +1158,18 @@ Condition: `$(GCC_GENERATE_DEBUGGING_SYMBOLS)`
 | ----- | -------- |
 | `dwarf` | `-g` |
 | `dwarf-with-dsym` | `-g` |
+
+
+
+### `GCC_DEBUG_INFORMATION_VERSION` (Enumeration)
+Default value: **`$(DEBUG_INFORMATION_VERSION)`**
+Condition: `$(GCC_GENERATE_DEBUGGING_SYMBOLS) && $(GCC_DEBUG_INFORMATION_FORMAT) != ""`
+
+| Enumeration value | Command Line Argument |
+| ----- | -------- |
+| `dwarf4` | `-gdwarf-4` |
+| `dwarf5` | `-gdwarf-5` |
+| `compiler-default` |  |
 
 
 
@@ -1405,6 +1464,26 @@ Condition: `$(CLANG_UNDEFINED_BEHAVIOR_SANITIZER_TRAP_ON_SECURITY_ISSUES) && $(G
 
 
 
+### `CLANG_ENABLE_C_TYPED_ALLOCATOR_SUPPORT` (Enumeration)
+
+| Enumeration value | Command Line Argument |
+| ----- | -------- |
+| `NO` | `-fno-typed-memory-operations` |
+| `YES` | `-ftyped-memory-operations` |
+| **`compiler-default`** |  |
+
+
+
+### `CLANG_ENABLE_CPLUSPLUS_TYPED_ALLOCATOR_SUPPORT` (Enumeration)
+
+| Enumeration value | Command Line Argument |
+| ----- | -------- |
+| `NO` | `-fno-typed-cxx-new-delete` |
+| `YES` | `-ftyped-cxx-new-delete` |
+| **`compiler-default`** |  |
+
+
+
 ### `CLANG_INDEX_STORE_PATH` (Path)
 Default value: **`$(INDEX_DATA_STORE_DIR)`**
 
@@ -1431,45 +1510,6 @@ Architectures: `x86_64, x86_64h, arm64, arm64e`
 | `NO` |  |
 | `YES` | `-fsanitize=thread` |
 
-
-
-### `CLANG_ARC_MIGRATE_PRECHECK` (Enumeration)
-
-| Enumeration value | Command Line Argument |
-| ----- | -------- |
-| **`donothing`** |  |
-| `precheck` | `-ccc-arcmt-check` |
-
-
-
-### `CLANG_ARC_MIGRATE_DIR` (Path)
-
-| Command Line Argument |
-| -------- |
-| `-ccc-arcmt-migrate $(path)` |
-
-
-### `CLANG_OBJC_MIGRATE_DIR` (Path)
-
-| Command Line Argument |
-| -------- |
-| `-ccc-objcmt-migrate $(path)` |
-
-
-### `CLANG_ARC_MIGRATE_EMIT_ERROR` (Boolean)
-
-| Boolean value | Command Line Argument |
-| ----- | -------- |
-| **`NO`** |  |
-| `YES` | `-arcmt-migrate-emit-errors` |
-
-
-
-### `CLANG_ARC_MIGRATE_REPORT_OUTPUT` (Path)
-
-| Command Line Argument |
-| -------- |
-| `-arcmt-migrate-report-output $(path)` |
 
 
 ### `CLANG_ENABLE_PREFIX_MAPPING` (Boolean)
@@ -3002,188 +3042,6 @@ Warn when a sub-expression of an arithmetic or logic expression can be omitted b
 | **`NO`** |  |
 | `YES` | `-Xclang -analyzer-tidy-checker=misc-redundant-expression` |
 
-
-
-
-
-# ObjC Migrator
-Apple Clang ObjC Migrator
-Source File Option: `--migrate`
-
-Special meanings:
-`$(value)` is replaced by the selected value or the default value.
-
-## Modernizer
-### Infer readwrite properties - `CLANG_MIGRATOR_READWRITE_PROPERTY` (Boolean)
-Infer readwrite properties from a getter and setter method.
-
-
-| Boolean value | Command Line Argument |
-| ----- | -------- |
-| `NO` |  |
-| **`YES`** | `-objcmt-migrate-readwrite-property` |
-
-
-
-### Infer readonly properties - `CLANG_MIGRATOR_READONLY_PROPERTY` (Boolean)
-Infer readonly properties from getter methods.
-
-
-| Boolean value | Command Line Argument |
-| ----- | -------- |
-| `NO` |  |
-| **`YES`** | `-objcmt-migrate-readonly-property` |
-
-
-
-### Add attribute annotations - `CLANG_MIGRATOR_ANNOTATIONS` (Boolean)
-Add attribute annotations to properties and methods.
-
-
-| Boolean value | Command Line Argument |
-| ----- | -------- |
-| `NO` |  |
-| **`YES`** | `-objcmt-migrate-annotation` |
-
-
-
-### Infer instancetype for method result type - `CLANG_MIGRATOR_INSTANCE_TYPE` (Boolean)
-Infer `instancetype` for method result type instead of `id`.
-
-
-| Boolean value | Command Line Argument |
-| ----- | -------- |
-| `NO` |  |
-| **`YES`** | `-objcmt-migrate-instancetype` |
-
-
-
-### Use NS_ENUM/NS_OPTIONS macros - `CLANG_MIGRATOR_NSENUM_MACROS` (Boolean)
-Use `NS_ENUM`/`NS_OPTIONS` macros for enumerators.
-
-
-| Boolean value | Command Line Argument |
-| ----- | -------- |
-| `NO` |  |
-| **`YES`** | `-objcmt-migrate-ns-macros` |
-
-
-
-### Infer protocol conformance - `CLANG_MIGRATOR_PROTOCOL_CONFORMANCE` (Boolean)
-Infer protocol conformance from the interface methods.
-
-
-| Boolean value | Command Line Argument |
-| ----- | -------- |
-| **`NO`** |  |
-| `YES` | `-objcmt-migrate-protocol-conformance` |
-
-
-
-### Atomicity of inferred properties - `CLANG_MIGRATOR_PROPERTY_ATOMICITY` (Enumeration)
-Choose the atomicity of the inferred properties.
-
-
-| Enumeration value | Command Line Argument |
-| ----- | -------- |
-| **`NS_NONATOMIC_IOSONLY`** | `-objcmt-ns-nonatomic-iosonly` |
-| `atomic` | `-objcmt-atomic-property` |
-| `nonatomic` |  |
-
-
-
-### Only modify public headers - `CLANG_MIGRATOR_PUBLIC_HEADERS_ONLY` (Boolean)
-Only modify public headers of a target.
-
-
-| Boolean value | Command Line Argument |
-| ----- | -------- |
-| `NO` |  |
-| **`YES`** | `-objcmt-white-list-dir-path=$(TARGET_BUILD_DIR)/$(PUBLIC_HEADERS_FOLDER_PATH)` |
-
-
-
-### ObjC literals - `CLANG_MIGRATOR_OBJC_LITERALS` (Boolean)
-Enable migration to modern ObjC literals syntax.
-
-
-| Boolean value | Command Line Argument |
-| ----- | -------- |
-| `NO` |  |
-| **`YES`** | `-objcmt-migrate-literals -Qunused-arguments` |
-
-
-
-### ObjC property-dot syntax - `CLANG_MIGRATOR_PROPERTY_DOT_SYNTAX` (Boolean)
-Enable migration of setter/getter messages to property-dot syntax.
-
-
-| Boolean value | Command Line Argument |
-| ----- | -------- |
-| `NO` |  |
-| **`YES`** | `-objcmt-migrate-property-dot-syntax` |
-
-
-
-### ObjC subscripting - `CLANG_MIGRATOR_OBJC_SUBSCRIPTING` (Boolean)
-Enable migration to modern ObjC subscripting syntax.
-
-
-| Boolean value | Command Line Argument |
-| ----- | -------- |
-| `NO` |  |
-| **`YES`** | `-objcmt-migrate-subscripting -Qunused-arguments` |
-
-
-
-### Infer designated initializer methods - `CLANG_MIGRATOR_OBJC_DESIGNATED_INIT` (Boolean)
-Infer `NS_DESIGNATED_INITIALIZER` for designated initializer methods.
-
-
-| Boolean value | Command Line Argument |
-| ----- | -------- |
-| `NO` |  |
-| **`YES`** | `-objcmt-migrate-designated-init -Qunused-arguments` |
-
-
-
-
-
-## None
-### `CLANG` (Path)
-Default value: **`clang`**
-
-The option only sets an internal value, which is used by other options as a condition or as an internal parameter.
-
-
-### `CLANG_INDEX_STORE_ENABLE` (Boolean)
-
-| Command Line Argument |
-| -------- |
-| `` |
-
-
-
-
-# XCTest Migrator
-Apple Clang XCTest Migrator
-Source File Option: `--migrate-xct`
-
-Special meanings:
-`$(value)` is replaced by the selected value or the default value.
-
-## None
-### `CLANG` (Path)
-Default value: **`clang`**
-
-The option only sets an internal value, which is used by other options as a condition or as an internal parameter.
-
-
-### `CLANG_INDEX_STORE_ENABLE` (Boolean)
-
-| Command Line Argument |
-| -------- |
-| `` |
 
 
 
